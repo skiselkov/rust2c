@@ -66,3 +66,21 @@ impl<T> SafePointerSlices<T> for *const T {
 		}
 	}
 }
+
+pub trait SafePointerSlicesMut<T> {
+	fn as_slice_mut<'a>(self, len: usize) -> &'a mut [T];
+}
+
+impl<T> SafePointerSlicesMut<T> for *mut T {
+	fn as_slice_mut<'a>(self, len: usize) -> &'a mut [T] {
+		assert!(!self.is_null() || len == 0);
+		let ptr = if !self.is_null() {
+			self
+		} else {
+			std::ptr::NonNull::dangling().as_ptr()
+		};
+		unsafe {
+			std::slice::from_raw_parts_mut(ptr, len)
+		}
+	}
+}

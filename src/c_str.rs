@@ -84,6 +84,7 @@ fixed_c_array_impl!(&'static str, 14);
 fixed_c_array_impl!(&'static str, 15);
 fixed_c_array_impl!(&'static str, 16);
 
+#[derive(Clone, Hash, Eq, PartialEq)]
 pub struct Str2C(Option<std::ffi::CString>);
 
 impl Str2C {

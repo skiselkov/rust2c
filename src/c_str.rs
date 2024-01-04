@@ -109,6 +109,13 @@ impl From<String> for Str2C {
 	}
 }
 
+impl From<&String> for Str2C {
+	fn from(value: &String) -> Self {
+		Self(Some(std::ffi::CString::new(value.as_str())
+		    .expect("Cannot convert to C string")))
+	}
+}
+
 impl From<Option<&str>> for Str2C {
 	fn from(value: Option<&str>) -> Self {
 		match value {

@@ -57,10 +57,14 @@ pub trait SafePointerSlices<T> {
 
 impl<T> SafePointerSlices<T> for *const T {
 	fn as_slice<'a>(self, len: usize) -> &'a [T] {
-		assert!(!self.is_null() || len == 0);
 		let ptr = if !self.is_null() {
 			self
 		} else {
+			if len != 0 {
+				panic!(concat!("Attempted to construct ",
+				    "slice from NULL pointer but with ",
+				    "non-zero length {}"), len);
+			}
 			std::ptr::NonNull::dangling().as_ptr()
 		};
 		unsafe {
@@ -75,10 +79,14 @@ pub trait SafePointerSlicesMut<T> {
 
 impl<T> SafePointerSlicesMut<T> for *mut T {
 	fn as_slice_mut<'a>(self, len: usize) -> &'a mut [T] {
-		assert!(!self.is_null() || len == 0);
 		let ptr = if !self.is_null() {
 			self
 		} else {
+			if len != 0 {
+				panic!(concat!("Attempted to construct ",
+				    "slice from NULL pointer but with ",
+				    "non-zero length {}"), len);
+			}
 			std::ptr::NonNull::dangling().as_ptr()
 		};
 		unsafe {

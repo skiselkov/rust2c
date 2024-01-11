@@ -155,6 +155,6 @@ macro_rules! lit2c {
 #[macro_export]
 macro_rules! str2c {
     ($s:expr) => {
-	crate::c_str::Str2C::from($s).as_ptr()
+	$crate::c_str::Str2C::from($s).as_ptr()
     };
 }

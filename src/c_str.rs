@@ -53,36 +53,45 @@ fixed_c_array_impl!(String, 14);
 fixed_c_array_impl!(String, 15);
 fixed_c_array_impl!(String, 16);
 
-impl CStringInHelpers<*const c_char> for &'static str {
+impl<'a> CStringInHelpers<*const c_char> for &'a str {
 	#[allow(clippy::not_unsafe_ptr_arg_deref)]
-	fn from_c(ptr: *const c_char) -> &'static str {
+	fn from_c(ptr: *const c_char) -> &'a str {
 		assert!(!ptr.is_null());
 		unsafe {std::ffi::CStr::from_ptr(ptr)}
 		    .to_str()
 		    .expect("Invalid UTF-8 data in string")
 	}
 }
-impl CStringInHelpers<&[c_char]> for &'static str {
-	fn from_c(arr: &[c_char]) -> &'static str {
+impl<'a> CStringInHelpers<&'a [c_char]> for &'a str {
+	fn from_c(arr: &'a [c_char]) -> &'a str {
 		Self::from_c(arr.as_ptr())
 	}
 }
-fixed_c_array_impl!(&'static str, 1);
-fixed_c_array_impl!(&'static str, 2);
-fixed_c_array_impl!(&'static str, 3);
-fixed_c_array_impl!(&'static str, 4);
-fixed_c_array_impl!(&'static str, 5);
-fixed_c_array_impl!(&'static str, 6);
-fixed_c_array_impl!(&'static str, 7);
-fixed_c_array_impl!(&'static str, 8);
-fixed_c_array_impl!(&'static str, 9);
-fixed_c_array_impl!(&'static str, 10);
-fixed_c_array_impl!(&'static str, 11);
-fixed_c_array_impl!(&'static str, 12);
-fixed_c_array_impl!(&'static str, 13);
-fixed_c_array_impl!(&'static str, 14);
-fixed_c_array_impl!(&'static str, 15);
-fixed_c_array_impl!(&'static str, 16);
+macro_rules! fixed_c_array2str_impl {
+    ($len:expr) => {
+	impl<'a> CStringInHelpers<&'a [c_char; $len]> for &'a str {
+		fn from_c(arr: &'a [c_char; $len]) -> &'a str {
+			Self::from_c(arr.as_ptr())
+		}
+	}
+    };
+}
+fixed_c_array2str_impl!(1);
+fixed_c_array2str_impl!(2);
+fixed_c_array2str_impl!(3);
+fixed_c_array2str_impl!(4);
+fixed_c_array2str_impl!(5);
+fixed_c_array2str_impl!(6);
+fixed_c_array2str_impl!(7);
+fixed_c_array2str_impl!(8);
+fixed_c_array2str_impl!(9);
+fixed_c_array2str_impl!(10);
+fixed_c_array2str_impl!(11);
+fixed_c_array2str_impl!(12);
+fixed_c_array2str_impl!(13);
+fixed_c_array2str_impl!(14);
+fixed_c_array2str_impl!(15);
+fixed_c_array2str_impl!(16);
 
 #[derive(Clone, Hash, Eq, PartialEq)]
 pub struct Str2C(Option<std::ffi::CString>);

@@ -151,6 +151,30 @@ impl From<Option<String>> for Str2C {
     }
 }
 
+impl From<&std::path::Path> for Str2C {
+    fn from(value: &std::path::Path) -> Self {
+        Self(Some(
+            std::ffi::CString::new(value.as_os_str().to_str().unwrap_or_else(
+                || {
+                    panic!(
+                        "Cannot represent path {} as string",
+                        value.display()
+                    )
+                },
+            ))
+            .unwrap_or_else(|_| {
+                panic!("Cannot represent path {} as CString", value.display())
+            }),
+        ))
+    }
+}
+
+impl From<&std::path::PathBuf> for Str2C {
+    fn from(value: &std::path::PathBuf) -> Self {
+        Self::from(value.as_path())
+    }
+}
+
 #[macro_export]
 macro_rules! lit2c {
     ($lit:literal) => {

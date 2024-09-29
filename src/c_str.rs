@@ -10,30 +10,32 @@
 use std::ffi::c_char;
 
 pub trait CStringInHelpers<T> {
-	fn from_c(ptr: T) -> Self;
+    fn from_c(ptr: T) -> Self;
 }
 
 impl CStringInHelpers<*const c_char> for String {
-	#[allow(clippy::not_unsafe_ptr_arg_deref)]
-	fn from_c(ptr: *const c_char) -> Self {
-		assert!(!ptr.is_null());
-		String::from(unsafe { std::ffi::CStr::from_ptr(ptr) }
-		    .to_str()
-		    .expect("Invalid UTF-8 data in string"))
-	}
+    #[allow(clippy::not_unsafe_ptr_arg_deref)]
+    fn from_c(ptr: *const c_char) -> Self {
+        assert!(!ptr.is_null());
+        String::from(
+            unsafe { std::ffi::CStr::from_ptr(ptr) }
+                .to_str()
+                .expect("Invalid UTF-8 data in string"),
+        )
+    }
 }
 impl CStringInHelpers<&[c_char]> for String {
-	fn from_c(arr: &[c_char]) -> Self {
-		Self::from_c(arr.as_ptr())
-	}
+    fn from_c(arr: &[c_char]) -> Self {
+        Self::from_c(arr.as_ptr())
+    }
 }
 macro_rules! fixed_c_array_impl {
     ($impl_type:ty, $len:expr) => {
-	impl CStringInHelpers<&[c_char; $len]> for $impl_type {
-		fn from_c(arr: &[c_char; $len]) -> $impl_type {
-			Self::from_c(arr.as_ptr())
-		}
-	}
+        impl CStringInHelpers<&[c_char; $len]> for $impl_type {
+            fn from_c(arr: &[c_char; $len]) -> $impl_type {
+                Self::from_c(arr.as_ptr())
+            }
+        }
     };
 }
 fixed_c_array_impl!(String, 1);
@@ -54,26 +56,26 @@ fixed_c_array_impl!(String, 15);
 fixed_c_array_impl!(String, 16);
 
 impl<'a> CStringInHelpers<*const c_char> for &'a str {
-	#[allow(clippy::not_unsafe_ptr_arg_deref)]
-	fn from_c(ptr: *const c_char) -> &'a str {
-		assert!(!ptr.is_null());
-		unsafe {std::ffi::CStr::from_ptr(ptr)}
-		    .to_str()
-		    .expect("Invalid UTF-8 data in string")
-	}
+    #[allow(clippy::not_unsafe_ptr_arg_deref)]
+    fn from_c(ptr: *const c_char) -> &'a str {
+        assert!(!ptr.is_null());
+        unsafe { std::ffi::CStr::from_ptr(ptr) }
+            .to_str()
+            .expect("Invalid UTF-8 data in string")
+    }
 }
 impl<'a> CStringInHelpers<&'a [c_char]> for &'a str {
-	fn from_c(arr: &'a [c_char]) -> &'a str {
-		Self::from_c(arr.as_ptr())
-	}
+    fn from_c(arr: &'a [c_char]) -> &'a str {
+        Self::from_c(arr.as_ptr())
+    }
 }
 macro_rules! fixed_c_array2str_impl {
     ($len:expr) => {
-	impl<'a> CStringInHelpers<&'a [c_char; $len]> for &'a str {
-		fn from_c(arr: &'a [c_char; $len]) -> &'a str {
-			Self::from_c(arr.as_ptr())
-		}
-	}
+        impl<'a> CStringInHelpers<&'a [c_char; $len]> for &'a str {
+            fn from_c(arr: &'a [c_char; $len]) -> &'a str {
+                Self::from_c(arr.as_ptr())
+            }
+        }
     };
 }
 fixed_c_array2str_impl!(1);
@@ -97,59 +99,63 @@ fixed_c_array2str_impl!(16);
 pub struct Str2C(Option<std::ffi::CString>);
 
 impl Str2C {
-	pub unsafe fn as_ptr(&self) -> *const c_char {
-		match &self.0 {
-		    Some(s) => s.as_ptr(),
-		    None => std::ptr::null(),
-		}
-	}
+    pub unsafe fn as_ptr(&self) -> *const c_char {
+        match &self.0 {
+            Some(s) => s.as_ptr(),
+            None => std::ptr::null(),
+        }
+    }
 }
 
 impl From<&str> for Str2C {
-	fn from(value: &str) -> Self {
-		Self(Some(std::ffi::CString::new(value)
-		    .expect("Cannot convert to C string")))
-	}
+    fn from(value: &str) -> Self {
+        Self(Some(
+            std::ffi::CString::new(value).expect("Cannot convert to C string"),
+        ))
+    }
 }
 
 impl From<String> for Str2C {
-	fn from(value: String) -> Self {
-		Self(Some(std::ffi::CString::new(value.as_str())
-		    .expect("Cannot convert to C string")))
-	}
+    fn from(value: String) -> Self {
+        Self(Some(
+            std::ffi::CString::new(value.as_str())
+                .expect("Cannot convert to C string"),
+        ))
+    }
 }
 
 impl From<&String> for Str2C {
-	fn from(value: &String) -> Self {
-		Self(Some(std::ffi::CString::new(value.as_str())
-		    .expect("Cannot convert to C string")))
-	}
+    fn from(value: &String) -> Self {
+        Self(Some(
+            std::ffi::CString::new(value.as_str())
+                .expect("Cannot convert to C string"),
+        ))
+    }
 }
 
 impl From<Option<&str>> for Str2C {
-	fn from(value: Option<&str>) -> Self {
-		match value {
-		    Some(s) => Str2C::from(s),
-		    None => Str2C(None),
-		}
-	}
+    fn from(value: Option<&str>) -> Self {
+        match value {
+            Some(s) => Str2C::from(s),
+            None => Str2C(None),
+        }
+    }
 }
 
 impl From<Option<String>> for Str2C {
-	fn from(value: Option<String>) -> Self {
-		match value {
-		    Some(s) => Str2C::from(s),
-		    None => Str2C(None),
-		}
-	}
+    fn from(value: Option<String>) -> Self {
+        match value {
+            Some(s) => Str2C::from(s),
+            None => Str2C(None),
+        }
+    }
 }
 
 #[macro_export]
 macro_rules! lit2c {
     ($lit:literal) => {
-	std::ffi::CStr::from_ptr(concat!($lit, "\0")
-	    .as_ptr() as *const c_char)
-	    .as_ptr()
+        std::ffi::CStr::from_ptr(concat!($lit, "\0").as_ptr() as *const c_char)
+            .as_ptr()
     };
 }
 
@@ -164,6 +170,6 @@ macro_rules! lit2c {
 #[macro_export]
 macro_rules! str2c {
     ($s:expr) => {
-	$crate::c_str::Str2C::from($s).as_ptr()
+        $crate::c_str::Str2C::from($s).as_ptr()
     };
 }

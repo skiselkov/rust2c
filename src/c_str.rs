@@ -197,3 +197,27 @@ macro_rules! str2c {
         $crate::c_str::Str2C::from($s).as_ptr()
     };
 }
+
+pub fn strlcpy(out_c: *mut c_char, in_rust: &str, out_c_cap: usize) -> usize {
+    use crate::c_ptr::SafePointerSlicesMut;
+    let out_c = out_c.as_slice_mut(out_c_cap);
+    // if the output is zero-length, bail, we can't do anything here
+    if out_c.is_empty() {
+        return in_rust.len() + 1;
+    }
+    // the amount of bytes to copy is the lesser of either the input Rust
+    // string slice, or the output buffer cap -1 (to allow for Nul termination).
+    let copy_lim = in_rust.len().min(out_c.len() - 1);
+    unsafe {
+        // copy_from_slice() needs both slices to be of equal length, so reslice
+        // the output to the actual copy limit and copy in only as many bytes as
+        // we want to copy from the input Rust string.
+        out_c[..copy_lim].copy_from_slice(
+            std::mem::transmute::<&[u8], &[i8]>(&in_rust.as_bytes()[..copy_lim])
+        );
+    }
+    // make sure the output C string is properly terminated
+    out_c[copy_lim] = 0;
+    // how much we actually tried to copy
+    in_rust.len() + 1
+}

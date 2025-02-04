@@ -212,9 +212,10 @@ pub fn strlcpy(out_c: *mut c_char, in_rust: &str, out_c_cap: usize) -> usize {
         // copy_from_slice() needs both slices to be of equal length, so reslice
         // the output to the actual copy limit and copy in only as many bytes as
         // we want to copy from the input Rust string.
-        out_c[..copy_lim].copy_from_slice(
-            std::mem::transmute::<&[u8], &[i8]>(&in_rust.as_bytes()[..copy_lim])
-        );
+        use std::mem::transmute;
+        out_c[..copy_lim].copy_from_slice(transmute::<&[u8], &[c_char]>(
+            &in_rust.as_bytes()[..copy_lim],
+        ));
     }
     // make sure the output C string is properly terminated
     out_c[copy_lim] = 0;

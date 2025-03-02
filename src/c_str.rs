@@ -105,6 +105,12 @@ impl Str2C {
             None => std::ptr::null(),
         }
     }
+    pub fn from_ref<S: AsRef<str>>(value: S) -> Self {
+        Self(Some(
+            std::ffi::CString::new(value.as_ref())
+                .expect("Cannot convert to C string"),
+        ))
+    }
 }
 
 impl From<&str> for Str2C {

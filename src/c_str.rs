@@ -181,21 +181,6 @@ impl From<&std::path::PathBuf> for Str2C {
     }
 }
 
-#[derive(Clone, Debug, Hash, Eq, PartialEq)]
-pub struct Str2CNonNull(std::ffi::CString);
-
-impl Str2CNonNull {
-    pub fn from_ref<S: AsRef<str>>(value: S) -> Self {
-        Self(
-            std::ffi::CString::new(value.as_ref())
-                .expect("Cannot convert to C string"),
-        )
-    }
-    pub fn as_ref(&self) -> &c_char {
-        unsafe { self.0.as_ptr().as_ref().unwrap() }
-    }
-}
-
 #[macro_export]
 macro_rules! lit2c {
     ($lit:literal) => {
